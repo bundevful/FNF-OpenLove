@@ -1,5 +1,3 @@
--- Modified by Stilic for FNF LÖVE
-
 local baton = {
 	_VERSION = 'Baton v1.0.2',
 	_DESCRIPTION = 'Input library for LÖVE.',
@@ -149,6 +147,8 @@ end
 function Player:_initControls()
 	self._controls = {}
 	self._sourceControls = {keyboardMouse = {}, joystick = {}}
+	self._pressBinds = {}
+	self._releaseBinds = {}
 	for controlName, sources in pairs(self.config.controls) do
 		self._controls[controlName] = {
 			sources = sources,
@@ -159,6 +159,8 @@ function Player:_initControls()
 			pressed = false,
 			released = false,
 			debounce = false,
+			pressBinds = {},
+			releaseBinds = {},
 		}
 		for _, source in pairs(sources) do
 			local type, value = parseSource(source)
@@ -192,8 +194,6 @@ function Player:_init(config)
 	self:_initControls()
 	self:_initPairs()
 	self._activeDevice = 'none'
-	self._pressBinds = {}
-	self._releaseBinds = {}
 end
 
 --[[
@@ -320,6 +320,9 @@ function Player:_pressControls(names, source, type, ...)
 		control.pressed = true
 		control.released = false
 		control.debounce = true
+		for _, bind in pairs(control.pressBinds) do
+			bind(...)
+		end
 	end
 end
 
@@ -338,6 +341,9 @@ function Player:_releaseControls(names, source, type, ...)
 		control.pressed = false
 		control.released = true
 		control.debounce = true
+		for _, bind in pairs(control.releaseBinds) do
+			bind(...)
+		end
 	end
 end
 
@@ -410,6 +416,36 @@ function Player:unbindRelease(bind)
 	local i = table.find(self._releaseBinds, bind)
 	if i then
 		table.remove(self._releaseBinds, i)
+	end
+end
+
+-- bind control presses callback
+function Player:bindControlPress(name, bind)
+	if self._controls[name] then
+		table.insert(self._controls[name].pressBinds, bind)
+	else
+		error('No control with name "' .. name .. '" defined', 3)
+	end
+end
+
+-- bind control releases callback
+function Player:bindControlRelease(name, bind)
+	if self._controls[name] then
+		table.insert(self._controls[name].releaseBinds, bind)
+	else
+		error('No control with name "' .. name .. '" defined', 3)
+	end
+end
+
+-- unbind control releases callback
+function Player:unbindControlPressed(name, bind)
+	if self._controls[name] then
+		local i = table.find(self._controls[name].releaseBinds, bind)
+		if i then
+			table.remove(self._controls[name].releaseBinds, i)
+		end
+	else
+		error('No control with name "' .. name .. '" defined', 3)
 	end
 end
 
