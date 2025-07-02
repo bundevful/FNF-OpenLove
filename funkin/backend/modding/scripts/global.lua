@@ -11,9 +11,9 @@ local function setBackgroundColor(color)
 	love.graphics.setBackgroundColor(color or Color.BLACK)
 end
 
-local function setTransitions(in, out)
+-- local function setTransitions(in, out)
 
-end
+-- end
 
 function GlobalScripts.reload()
 	local oldScripts = {}

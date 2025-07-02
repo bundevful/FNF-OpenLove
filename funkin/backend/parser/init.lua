@@ -81,7 +81,7 @@ function Parser.getMeta(name)
 
 		icon = HealthIcon.defaultIcon,
 		color = Color.WHITE,
-		difficulties = {"Easy", "Normal", "Hard"}
+		difficulties = {"easy", "normal", "hard"}
 	}
 
 	local data = paths.getJSON("songs/" .. format(name) .. "/meta")
@@ -110,6 +110,9 @@ function Parser.getMeta(name)
 	meta.displayName = get({"displayName", "songName", "song", "name"}, meta.displayName)
 	meta.icon = get("icon", meta.icon)
 	meta.difficulties = get("difficulties", meta.difficulties)
+	for i, difficulty in ipairs(meta.difficulties) do
+		meta.difficulties[i] = difficulty:gsub("^%l", string.upper)
+	end
 
 	meta.charter = get("charter", meta.charter)
 	meta.composer = get({"composer", "artist"}, meta.composer)

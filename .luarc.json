@@ -19,7 +19,8 @@
     "cast-local-type",
     "assign-type-mismatch",
     "unbalanced-assignments",
-    "redefined-local"
+    "redefined-local",
+        "missing-fields"
   ],
   "completion.autoRequire": false
 }

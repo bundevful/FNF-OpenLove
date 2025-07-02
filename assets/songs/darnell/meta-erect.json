@@ -9,7 +9,7 @@
     "songVariations": [],
     "difficulties": ["erect", "nightmare"],
     "characters": {
-      "player": "pico-playable",
+      "player": "pico",
       "girlfriend": "nene",
       "opponent": "darnell",
       "instrumental": "erect",

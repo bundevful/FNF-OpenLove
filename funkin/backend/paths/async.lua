@@ -229,7 +229,9 @@ local function loadAtlas(key, kind, callback)
 	local cachekey = paths.getPath("images/" .. key)
 	local obj = paths.atlases[cachekey]
 
-	if obj then if callback then callback(obj) end; return obj end
+	if obj then
+		if callback then callback(obj) end; return obj
+	end
 
 	if not paths.exists(dataPath, "file") then
 		local type = kind == "sparrow" and "XML" or "TXT"
@@ -239,7 +241,9 @@ local function loadAtlas(key, kind, callback)
 	end
 
 	local function processAtlas(img)
-		if not img then if callback then callback(nil) end; return nil end
+		if not img then
+			if callback then callback(nil) end; return nil
+		end
 		local data = love.filesystem.read(dataPath)
 		if not data then
 			local type = kind == "sparrow" and "XML" or "TXT"
@@ -295,7 +299,7 @@ function async.getProgress()
 	return math.min(1, stats.completed / stats.queued)
 end
 
-function async.crashstop()
+function async.stop()
 	for i = 1, #threads do
 		c_task:push("exit")
 	end

@@ -15,10 +15,6 @@ function string:split(sep, t)
 	return split_t
 end
 
-function string:replace(pattern, rep) -- note: you could just do gsub instead of replace
-	return self:gsub("%" .. pattern, rep)
-end
-
 -- see https://luajit.org/extensions.html
 local s, table_new = pcall(require, "table.new")
 if not s then function table_new( --[[narray, nhash]]) return {} end end

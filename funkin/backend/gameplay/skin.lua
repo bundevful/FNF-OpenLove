@@ -59,7 +59,7 @@ function Skin:getPath(asset, type)
 		path = buildFullPath("default-pixel")
 	end
 	if not path then path = buildFullPath("default") end
-	return path or "skins/default/" .. asset
+	return path or ("skins/default/" .. asset)
 end
 
 return Skin

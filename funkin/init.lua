@@ -219,7 +219,7 @@ local function error_printer(msg, layer)
 end
 
 function funkin.throwError(msg)
-	paths.async.crashstop()
+	paths.async.stop()
 	pcall(love.errorhandler_quit)
 
 	msg = tostring(msg)

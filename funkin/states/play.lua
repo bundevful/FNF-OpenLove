@@ -86,7 +86,7 @@ function PlayState:preload()
 	local diff, async = PlayState.songDifficulty:lower(), paths.async
 
 	local function getInst()
-		return async.getInst(song, diff) or async.getInst(song, nil)
+		return async.getInst(song, diff) or async.getInst(song)
 	end
 	local function getVocals(suffix, fallback, skip)
 		local vocal = async.getVoices(song, suffix .. "-" .. diff) or
@@ -144,7 +144,7 @@ function PlayState:preload()
 						end
 					end
 				end
-				table.insert(list, {"image", "icons/" .. data.icon or "face"})
+				table.insert(list, {"image", ("icons/" .. data.icon) or "face"})
 			end
 		end
 	end
@@ -280,7 +280,7 @@ function PlayState:enter()
 	local volume = ClientPrefs.data.vocalVolume / 100
 	local function getVocals(char, fallback, n)
 		local file = (paths.getVoices(songName, char .. "-" .. difficulty) or
-			paths.getVoices(songName, difficulty) or paths.getVoices(songName, char, true)) or
+				paths.getVoices(songName, difficulty) or paths.getVoices(songName, char, true)) or
 			(fallback and paths.getVoices(songName, fallback, true) or nil) or
 			(n and paths.getVoices(songName, nil))
 		if file then
@@ -299,7 +299,7 @@ function PlayState:enter()
 	local y, keys, speed = game.height / 2, 4, PlayState.SONG.speed
 	local config = {
 		{"player", self.boyfriend, playerVocals, ClientPrefs.data.botplayMode, true},
-		{"enemy", self.dad, enemyVocals, true},
+		{"enemy",  self.dad,       enemyVocals,  true},
 	}
 	for _, nf in ipairs(config) do
 		local field, notes = nf[1] .. "Notefield", PlayState.SONG.notes[nf[1]]
@@ -385,10 +385,10 @@ function PlayState:enter()
 	self.health = 1
 
 	self.ratings = {
-		{name = "sick", time = 0.045,  score = 350, splash = true,  mod = 1},
-		{name = "good", time = 0.090,  score = 200, splash = false, mod = 1},
-		{name = "bad",  time = 0.135,  score = 100, splash = false, mod = .5, resetCombo = true},
-		{name = "shit", time = -1,     score = 50,  splash = false, mod = .25, resetCombo = true}
+		{name = "sick", time = 0.045, score = 350, splash = true,  mod = 1},
+		{name = "good", time = 0.090, score = 200, splash = false, mod = 1},
+		{name = "bad",  time = 0.135, score = 100, splash = false, mod = .5,  resetCombo = true},
+		{name = "shit", time = -1,    score = 50,  splash = false, mod = .25, resetCombo = true}
 	}
 	for _, r in ipairs(self.ratings) do
 		self[r.name .. "s"] = 0
@@ -974,7 +974,7 @@ function PlayState:update(dt)
 	if Project.DEBUG_MODE then
 		if game.keys.justPressed.ONE then self.playerNotefield.bot = not self.playerNotefield.bot end
 		if game.keys.justPressed.TWO then self:endSong() end
-		if game.keys.justPressed.THREE then
+		if game.keys.justPressed.THREE and not self.startingSong then
 			local time, vocals = (PlayState.conductor.time +
 				PlayState.conductor.crotchet * (game.keys.pressed.SHIFT and 8 or 4)) / 1000
 			self.skipConductor, PlayState.conductor.time = true, time * 1000
@@ -1485,9 +1485,6 @@ function PlayState:updateDiscordRPC(paused)
 	if PlayState.storyMode then detailsText = "Story Mode: " .. PlayState.storyWeek end
 
 	local diff = PlayState.defaultDifficulty
-	if PlayState.songDifficulty ~= "" then
-		diff = PlayState.songDifficulty:gsub("^%l", string.upper)
-	end
 
 	if paused then
 		Discord.changePresence({

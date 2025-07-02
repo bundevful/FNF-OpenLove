@@ -8,7 +8,7 @@
     "difficulties": ["easy", "normal", "hard"],
     "characters": {
       "album": "volume3",
-      "player": "pico-playable",
+      "player": "pico",
       "girlfriend": "nene",
       "opponent": "darnell",
       "instrumental": "",
