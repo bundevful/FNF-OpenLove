@@ -4,7 +4,7 @@ Stickers.previous = nil
 local function sortByTime(a, b) return a.time < b.time end
 local random = math.random
 
-function Stickers:new(stickerSet, state)
+function Stickers:new(stickerSet, state, ending)
 	Stickers.super.new(self)
 
 	self.curState = game.getState()
@@ -37,7 +37,7 @@ function Stickers:new(stickerSet, state)
 		end
 	end
 
-	if not Stickers.previous then
+	if not ending then
 		self:clear()
 
 		local data, stks = self:getStickers(self.stickerSet), {}
@@ -60,8 +60,10 @@ function Stickers:new(stickerSet, state)
 		end
 
 		self.isDirty = true
+		if state then self:start(state) end
+	else
+		self:unspawn()
 	end
-	if state then self:start(state) end
 end
 
 function Stickers:createSticker(set, name, x, y)
@@ -72,7 +74,7 @@ function Stickers:createSticker(set, name, x, y)
 	if #self.sounds > 0 then
 		sticker.sound = paths.getSound(table.random(self.sounds))
 	end
-	sticker.scale = {x = 1.1, y = 1.1}
+	sticker.scale:set(1.1, 1.1)
 	sticker.angle = math.random(-60, 70)
 	sticker.visible = false
 	sticker:updateHitbox()
@@ -92,7 +94,7 @@ function Stickers:spawn()
 
 			local timer = (i == #self.members) and 2 or random(0, 200) / 100
 			Timer.wait((1 / 24) * timer, function()
-				sticker.scale = {x = 1, y = 1}
+				sticker.scale:set(1, 1)
 
 				if i == #self.members then
 					if not self.targetState then return self:start() end
@@ -104,8 +106,7 @@ function Stickers:spawn()
 					local superenter = self.targetState.enter
 					self.targetState.enter = function(this)
 						superenter(this)
-						local stickers = Stickers()
-						stickers:start()
+						local stickers = Stickers(nil, nil, true)
 						this:add(stickers)
 					end
 				end
@@ -130,7 +131,7 @@ function Stickers:unspawn()
 		local sticky = self:createSticker(s.name, s.set, s.x, s.y)
 		sticky.time, sticky.visible = s.time, true
 		sticky.angle = s.angle
-		sticky.scale = {x = 1, y = 1}
+		sticky.scale:set(1, 1)
 	end
 
 	for i, sticker in ipairs(self.members) do
@@ -149,8 +150,7 @@ end
 
 function Stickers:start(target)
 	self.targetState = target or MainMenuState()
-	; (Stickers.previous and Stickers.unspawn or Stickers.spawn)(self)
-	-- semicolon is to avoid ambiguous syntax error!!
+	self:spawn()
 end
 
 function Stickers:update(dt)

@@ -70,6 +70,14 @@ local function lightingAnimation()
 	end)
 end
 
+function preload()
+	return {
+	    {"image", SCRIPT_PATH .. "window"},
+	    {"image", SCRIPT_PATH .. "bg_shadows"},
+	    {"image", SCRIPT_PATH .. "windowReflect"},
+	}
+end
+
 function create()
 	self.dadCam.y = 34
 

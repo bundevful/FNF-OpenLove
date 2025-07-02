@@ -27,7 +27,8 @@ THE SOFTWARE.
 
 local state_init = setmetatable({leave = __NULL__}, {
 	__index = function()
-		error("Use Gamestate.switch() to initialize")
+		-- error("Use Gamestate.switch() to initialize")
+		return false
 	end
 })
 local stack, state_is_dirty = {state_init}, true

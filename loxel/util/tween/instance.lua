@@ -135,7 +135,7 @@ function Tween:complete()
 			end
 		end
 	end
-	if self.onComplete then self.onComplete(self.object) end
+	if self.onComplete then self.onComplete(self) end
 end
 
 function Tween:pause() self.active = true end

@@ -1,9 +1,6 @@
 local BackgroundDancer = require "backgrounddancer"
 
-local bgLimo
 local grpLimoDancers
-local limo
-local fastCar
 local fastCarCanDrive = true
 local fastCarSpeed = 170
 
@@ -32,57 +29,24 @@ local function fastCarDrive()
 end
 
 function create()
-	self.dadCam.y = 86
-	self.camZoom = 0.9
+	dadCam.y = -100
+	boyfriendPos = {x = 1078, y = -156}
+	boyfriendCam.x = boyfriendCam.x - 200
+	camZoom = 0.9
+end
 
-	self.boyfriendPos = {x = 1078, y = -156}
-	self.boyfriendCam = {x = -200, y = 0}
-
-	local skyBG = Sprite(-150, -50)
-	skyBG:loadTexture(paths.getImage(SCRIPT_PATH .. 'limoSunset'))
-	skyBG:setScrollFactor(0.36, 0.11)
-	self:add(skyBG)
-	skyBG.shader = shader:get()
-
-	bgLimo = Sprite(-200, 480)
-	bgLimo:setFrames(paths.getSparrowAtlas(SCRIPT_PATH .. 'bgLimo'))
-	bgLimo:addAnimByPrefix('drive', "background limo pink", 24)
-	bgLimo:play('drive')
-	bgLimo:setScrollFactor(0.4, 0.4)
-	self:add(bgLimo)
-
+function postCreate()
 	grpLimoDancers = Group()
-	self:add(grpLimoDancers)
-
+	self:insert(self:indexOf(bgLimo) + 1, grpLimoDancers)
 	for i = 0, 4 do
 		local dancer = BackgroundDancer((370 * i) + 230, bgLimo.y - 380)
 		dancer:setScrollFactor(0.4, 0.4)
 		grpLimoDancers:add(dancer)
 	end
+	skyBG.shader = shader:get()
 
-	limo = Sprite(-120, 550)
-	limo:setFrames(paths.getSparrowAtlas(SCRIPT_PATH .. 'limoDrive'))
-	limo:addAnimByPrefix('drive', "Limo stage", 24)
-	limo:play('drive')
-
-	fastCar = Sprite(-300, 160)
-	fastCar:loadTexture(paths.getImage(SCRIPT_PATH .. 'fastCarLol'))
 	fastCar.moves = true
-	self:add(fastCar, true)
 	resetFastCar()
-
-	local skyOverlay = Sprite(-428, -304)
-	skyOverlay:loadTexture(paths.getImage(SCRIPT_PATH .. "limoOverlay"))
-	skyOverlay.blend = "add"
-	skyOverlay:setGraphicSize(skyOverlay.width * 0.76)
-	skyOverlay:updateHitbox()
-	skyOverlay.alpha = 0.168
-	skyOverlay:setScrollFactor(0.23, 0.18)
-	self:add(skyOverlay, true)
-end
-
-function postCreate()
-	state:insert(state:indexOf(state.gf) + 1, limo)
 end
 
 local bgLimoTime = 0

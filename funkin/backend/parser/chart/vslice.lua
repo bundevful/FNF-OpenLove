@@ -5,7 +5,16 @@ local function getFromMeta(meta, tbl)
 	local info = meta.playData
 
 	Parser.pset(tbl, "song", meta.songName or meta.song)
-	Parser.pset(tbl, "stage", info.stage)
+	local stage
+	switch(info.stage, {
+		["mainStage"] = function() stage = "stage" end,
+		["spookyMansion"] = function() stage = "spooky" end,
+		["phillyTrain"] = function() stage = "philly" end,
+		["limoRide"] = function() stage = "limo" end,
+		["mallXmas"] = function() stage = "mall" end,
+		["schoolEvil"] = function() stage = "school-evil" end
+	})
+	Parser.pset(tbl, "stage", stage or info.stage)
 
 	local notestyle = info.noteStyle == "funkin" and
 		"default" or info.noteStyle == "pixel" and "default-pixel"
@@ -43,17 +52,6 @@ function vslice.parse(data, _, meta, diff)
 	local chart = Parser.getDummyChart()
 
 	if meta then getFromMeta(meta, chart) end
-
-	if chart.timeChanges then
-		-- todo rework this and rework conductor too maybe??
-		for i, c in ipairs(chart.timeChanges) do
-			if c.t <= 0 then
-				chart.bpm = c.bpm
-				table.remove(chart.timeChanges, i)
-				break
-			end
-		end
-	end
 
 	if data.notes[diff:lower()] then
 		local speed = data.scrollSpeed and (data.scrollSpeed[diff:lower()] or

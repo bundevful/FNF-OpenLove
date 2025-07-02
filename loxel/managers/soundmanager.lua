@@ -46,8 +46,8 @@ end
 function SoundManager.__adjust()
 	for _, sound in ipairs(SoundManager.list.members) do
 		if sound.exists and sound.active then
-			sound:setVolume()
-			sound:setPitch()
+			sound.volume = sound.volume
+			sound.pitch = sound.pitch
 		end
 	end
 end

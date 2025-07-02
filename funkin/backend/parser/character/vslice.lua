@@ -5,13 +5,12 @@ function vslice.parse(data, name)
 
 	Parser.pset(char, "sing_duration", data.singTime)
 	Parser.pset(char, "flip_x", data.flipX)
-	Parser.pset(char, "sprite", data.assetPath)
+	Parser.pset(char, "sprite", data.assetPath:gsub("shared:", ""))
 
 	local healthIconId = data.healthIcon and data.healthIcon.id or name
 	local isPixel = data.healthIcon and data.healthIcon.isPixel or false
 	data.healthIcon = {id = healthIconId, isPixel = isPixel}
 	Parser.pset(char, "icon", healthIconId .. (isPixel and "-pixel" or ""))
-	char.animations = {}
 
 	for _, anim in pairs(data.animations) do
 		local name = '' .. anim.name
@@ -24,7 +23,7 @@ function vslice.parse(data, name)
 			anim.prefix or '',
 			anim.frameIndices or {},
 			anim.fps or 24,
-			anim.loop == true,
+			anim.looped == true,
 			anim.offsets or {0, 0},
 			anim.assetPath
 		}

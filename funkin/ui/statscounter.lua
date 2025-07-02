@@ -20,9 +20,10 @@ function StatsCounter:new(x, y, font, bigfont, color, align)
 end
 
 local combine, content, bigcontent = " | "
-local fpsFormat, tpsFormat, inputsFormat = "%d FPS", "%d TPS", "Inputs: %dms"
+local fpsFormat, tpsFormat = "%d FPS", "%d TPS"
 local ramFormat, renderFormat, drawsFormat = "%s RAM | %s VRAM", "%s | %s", "%d DRAWS"
-function StatsCounter:___render(x, y, r, g, b, a, font, bigfont, bigheight, width, align, rad, sx, sy, ox, oy)
+function StatsCounter:___render(x, y, color, font, bigfont, bigheight, width, align, rad, sx, sy, ox, oy)
+	local r, g, b, a = Color.get(color or 0xFFFFFF)
 	if self.showFps then
 		love.graphics.setFont(bigfont)
 		love.graphics.setColor(r, g, b, a)
@@ -56,9 +57,8 @@ function StatsCounter:__render(camera)
 	local font, bigfont = self.font, self.bigfont
 	local align, color, width, bigheight = self.alignment, self.color, self.width, bigfont:getHeight()
 
-	bigcontent = fpsFormat:format(math.min(love.timer.getFPS(), love.FPScap))
-	if love.parallelUpdate then bigcontent = bigcontent .. combine .. tpsFormat:format(love.timer.getTPS()) end
-	if love.asyncInput then bigcontent = bigcontent .. combine .. inputsFormat:format(love.timer.getInputs() * 1e4) end
+	bigcontent = fpsFormat:format(love.timer.getFPS())
+	if not love.vsync then bigcontent = bigcontent .. combine .. tpsFormat:format(love.timer.getTPS()) end
 
 	stats = love.graphics.getStats(stats)
 	ram, vram = math.countbytes(collectgarbage(count), 2), math.countbytes(stats.texturememory)
@@ -71,8 +71,8 @@ function StatsCounter:__render(camera)
 
 	love.graphics.setShader(self.shader); love.graphics.setBlendMode(self.blend)
 
-	self:___render(x + 2, y + 2, 0, 0, 0, self.alpha * 0.8, font, bigfont, bigheight, width, align, rad, sx, sy, ox, oy)
-	self:___render(x, y, color[1], color[2], color[3], self.alpha, font, bigfont, bigheight, width, align, rad, sx, sy, ox, oy)
+	self:___render(x + 2, y + 2, {0, 0, 0, self.alpha * 0.8}, font, bigfont, bigheight, width, align, rad, sx, sy, ox, oy)
+	self:___render(x, y, color, font, bigfont, bigheight, width, align, rad, sx, sy, ox, oy)
 
 	love.graphics.setFont(_font)
 	love.graphics.setColor(r, g, b, a)

@@ -1,4 +1,3 @@
-local decodeJson = (require "lib.json").decode
 local FreeplayState = State:extend("FreeplayState")
 FreeplayState.curDifficulty = 2
 
@@ -55,27 +54,7 @@ function FreeplayState:enter()
 	self:add(self.scoreText)
 
 	if love.system.getDevice() == "Mobile" then
-		self.buttons = VirtualPadGroup()
-		local w = 134
-
-		local left = VirtualPad("left", 0, game.height - w)
-		local up = VirtualPad("up", left.x + w, left.y - w)
-		local down = VirtualPad("down", up.x, left.y)
-		local right = VirtualPad("right", down.x + w, left.y)
-
-		local enter = VirtualPad("return", game.width - w, left.y)
-		enter.color = Color.LIME
-		local back = VirtualPad("escape", enter.x - w, left.y)
-		back.color = Color.RED
-
-		self.buttons:add(left)
-		self.buttons:add(up)
-		self.buttons:add(down)
-		self.buttons:add(right)
-
-		self.buttons:add(enter)
-		self.buttons:add(back)
-
+		self.buttons = util.createButtons(self.noSongTxt and "b" or "lrudab")
 		self:add(self.buttons)
 	end
 
@@ -105,7 +84,7 @@ function FreeplayState:openSong(song)
 		PlayState.storyDifficulty = diff
 		game.switchState(ChartingState())
 	else
-		game.switchState(PlayState(false, song.songName, diff))
+		game.switchState(LoadState(PlayState(nil, song.songName, diff)))
 	end
 end
 
@@ -113,7 +92,7 @@ function FreeplayState:update(dt)
 	self.script:call("update", dt)
 	if self.notCreated then
 		FreeplayState.super.update(self, dt)
-		self.script:call("postUpdate")
+		self.script:call("postUpdate", dt)
 		return
 	end
 

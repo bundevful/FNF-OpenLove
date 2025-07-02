@@ -36,7 +36,7 @@ function StoryMenuState:enter()
 
 	PlayState.storyMode = true
 
-	self.scoreText = Text(10, 10, "SCORE: 49324858",
+	self.scoreText = Text(10, 10, "SCORE: 0",
 		paths.getFont('vcr.ttf', 36), Color.WHITE, 'right')
 	self.scoreText.antialiasing = false
 
@@ -145,27 +145,7 @@ function StoryMenuState:enter()
 	self.throttles.right = Throttle:make({controls.down, controls, "ui_right"})
 
 	if love.system.getDevice() == "Mobile" then
-		self.buttons = VirtualPadGroup()
-		local w = 134
-
-		local left = VirtualPad("left", 0, game.height - w)
-		local up = VirtualPad("up", left.x + w, left.y - w)
-		local down = VirtualPad("down", up.x, left.y)
-		local right = VirtualPad("right", down.x + w, left.y)
-
-		local enter = VirtualPad("return", game.width - w, left.y)
-		enter.color = Color.LIME
-		local back = VirtualPad("escape", enter.x - w, left.y)
-		back.color = Color.RED
-
-		self.buttons:add(left)
-		self.buttons:add(up)
-		self.buttons:add(down)
-		self.buttons:add(right)
-
-		self.buttons:add(enter)
-		self.buttons:add(back)
-
+		self.buttons = util.createButtons(self.noWeeksTxt and "b" or "lrudab")
 		self:add(self.buttons)
 	end
 
@@ -194,14 +174,14 @@ function StoryMenuState:update(dt)
 	if #self.weeksData > 0 and not self.movedBack and not self.selectedWeek and
 		not self.inSubstate and self.throttles then
 		if controls:down("ui_left") then
-			self.leftArrow:play('press')
-		else
-			self.leftArrow:play('idle')
+			self.leftArrow.animation:play('press')
+		elseif self.leftArrow.animation.name ~= "idle" then
+			self.leftArrow.animation:play('idle')
 		end
 		if controls:down("ui_right") then
-			self.rightArrow:play('press')
-		else
-			self.rightArrow:play('idle')
+			self.rightArrow.animation:play('press')
+		elseif self.rightArrow.animation.name ~= "idle" then
+			self.rightArrow.animation:play('idle')
 		end
 
 		if self.throttles.left:check() then self:changeDifficulty(-1) end
@@ -233,7 +213,7 @@ function StoryMenuState:selectWeek()
 		local diff = (leWeek.difficulties and leWeek.difficulties[StoryMenuState.curDifficulty] or
 			self.diffs[StoryMenuState.curDifficulty])
 
-		local toState = PlayState(true, songTable, diff)
+		local toState = LoadState(PlayState(true, songTable, diff))
 		PlayState.storyWeek = leWeek.name
 		PlayState.storyWeekFile = leWeek.file
 

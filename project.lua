@@ -4,11 +4,12 @@ return {
 	title = "Friday Night Funkin' Löve",
 	file = "FNF-LOVE",
 	icon = "art/icon.png",
-	version = "1.0.0-dev",
+	version = "1.0.1-dev",
 	package = "com.stilic.fnflove",
 	width = 1280,
 	height = 720,
 	FPS = 60,
+	vSync = true,
 	company = "Stilic",
 
 	flags = {

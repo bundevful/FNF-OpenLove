@@ -1,5 +1,6 @@
 Ease = loxreq "util.tween.ease"
 local Instance = loxreq "util.tween.instance"
+local Motion = loxreq "util.tween.motion"
 
 local Tween = {}
 Tween.__index = Tween
@@ -7,9 +8,17 @@ Tween.__index = Tween
 function Tween:tween(object, props, duration, options)
 	local tween = Instance()
 	tween.manager = self
+	tween.persist = options and (options.persist == true) or false
 	tween:tween(object, props, duration, options)
-	self.lastInstances = 0
 
+	table.insert(self.instances, tween)
+	return tween
+end
+
+function Tween:quadPath(object, points, speed, isDuration, options)
+	local tween = Motion.QuadPath(object, options, points, speed)
+	tween.object = object
+	tween:setMotion(speed, isDuration)
 	table.insert(self.instances, tween)
 	return tween
 end
@@ -19,11 +28,6 @@ function Tween:remove(instance)
 end
 
 function Tween:update(dt)
-	if self.lastInstances ~= #self.instances then
-		-- print("New tween instance added, total of " .. #self.instances)
-		self.lastInstances = #self.instances
-	end
-
 	if dt == 0 then return end
 
 	for i = #self.instances, 1, -1 do
@@ -45,7 +49,7 @@ end
 function Tween:clear()
 	for i = #self.instances, 1, -1 do
 		local tween = self.instances[i]
-		if tween and tween.destroy then tween:destroy() end
+		if tween and tween.destroy and not tween.persist then tween:destroy() end
 	end
 end
 
