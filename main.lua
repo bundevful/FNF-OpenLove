@@ -8,7 +8,7 @@ function love.load() funkin.load() end
 function love.resize(w, h) game.resize(w, h) end
 
 function love.keypressed(key, ...)
-	if key == "f5" then
+	if key == "f5" and not game.getState():is(PlayState) then
 		game.resetState(true)
 	elseif Project.DEBUG_MODE and love.keyboard.isDown("lctrl", "rctrl") then
 		if key == "f4" then error("force crash") end

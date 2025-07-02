@@ -833,7 +833,16 @@ function PlayState:resetStroke(notefield, dir, doPress)
 	end
 end
 
+function PlayState:resetState()
+	self.load = LoadScreen(getmetatable(game.getState())())
+	self.load.cameras = {self.camOther}
+	self:add(self.load)
+end
+
 function PlayState:update(dt)
+	if game.keys.justPressed.F5 then
+		self:resetState()
+	end
 	if self.load then
 		self.load:update(dt)
 		if paths.async.getProgress() == 1 then
@@ -1446,9 +1455,7 @@ function PlayState:endSong(skip)
 			end
 
 			PlayState.loadSong(PlayState.storyPlaylist[1], PlayState.songDifficulty)
-			self.load = LoadScreen(getmetatable(game.getState())())
-			self.load.cameras = {self.camOther}
-			self:add(self.load)
+			self:resetState()
 		else
 			GameOverSubstate.deaths = 0
 			PlayState.canFadeInReceptors = true
