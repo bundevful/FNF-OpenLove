@@ -5,7 +5,7 @@ local function getFromMeta(data, tbl)
 	Parser.pset(tbl, "skin", data.skin)
 
 	Parser.pset(tbl, "difficulties", data.difficulties)
-	-- Parser.pset(tbl, "bpm", data.bpm)
+	Parser.pset(tbl, "bpm", data.bpm)
 end
 
 local function getStuff(data, eventData, chart)
@@ -69,10 +69,13 @@ function codename.parse(data, events, meta)
 	Parser.pset(chart, "stage", data.stage)
 	Parser.pset(chart, "speed", data.scrollSpeed)
 
-	if data.bpm then
-		chart.timeChanges = {Parser.newTimeChange(0, bpm)}
-		-- no idea how is time changes on codename format !!
+	local timeChanges = {}
+	for _, e in ipairs(events) do
+		if e.name == "BPM Change" then
+			table.insert(timeChanges, Parser.newTimeChange(e.time, e.params[1]))
+		end
 	end
+	chart.timeChanges = timeChanges
 
 	chart.notes, chart.events = getStuff(data, events, chart)
 
