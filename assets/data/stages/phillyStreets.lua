@@ -1,3 +1,5 @@
+local Puddle = require "puddlething"
+
 local sky, cars, cars2, traffic
 
 local rainStartIntensity = .01
@@ -57,11 +59,20 @@ function preload()
 	}
 end
 
+local camtable, cam
 function create()
 	camZoom = 0.77
 	boyfriendPos = {x = 2151, y = 500}
-	gfPos = {x = 1100, y = 470}
+	gfPos = {x = 1200, y = 1150}
 	dadPos = {x = 920, y = 1330}
+
+	cam = Camera()
+	cam.simple = false
+	cam.zoom = 0.77
+	cam.alpha = 0.00000000000000001
+	game.cameras.add(cam, false)
+	camtable = {game.camera, cam}
+	cam.angle = 3
 
 	boyfriendCam.x = boyfriendCam.x - 150
 	boyfriendCam.y = boyfriendCam.y - 10
@@ -127,6 +138,28 @@ function create()
 
 	make(88, 317, 'phillyForeground', 1, 1)
 	make(920, 1045, 'SpraycanPile', 1, 1, true)
+
+	local puddle = Puddle(536, 1120, paths.getImage(SCRIPT_PATH .. 'puddle'), cam)
+	puddle.alpha = 0.6
+	puddle.blend = "add"
+	add(puddle)
+
+	textthing = Text(150, 400, "")
+	textthing.cameras = {camOther}
+	add(textthing)
+end
+
+function postDraw()
+end
+
+function postCreate()
+	boyfriend.cameras = camtable
+	dad.cameras = camtable
+	gf.cameras = camtable
+	self.cameras = camtable
+
+	cam:snapToTarget(gf)
+	cam.scroll.x, cam.scroll.y = cam.scroll.x + 810, cam.scroll.y + 750
 end
 
 local paths = {
@@ -271,6 +304,8 @@ function update(dt)
 	local remap = math.remapToRange(conductor.time / 1000, 0, game.sound.music.duration,
 		rainStartIntensity, rainEndIntensity)
 	rain.intensity = remap
+
+	textthing.content = camFollow.x
 end
 
 function beat(b)

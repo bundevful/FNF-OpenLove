@@ -3,13 +3,14 @@ function event(params)
 
 	local n = isTable and params.v.char or tonumber(params.v)
 	local ox, oy = isTable and params.v.x or 0, isTable and params.v.y or 0
+	cameraOffset:set(-ox, -oy)
 
 	local notefield = state.notefields[n + 1]
 	if notefield then
 		local char = notefield.character
 		if char then
 			local camX, camY = state:getCameraPosition(char)
-			ox, oy = ox + camX, oy + camY
+			ox, oy = camX, camY
 			state.camTarget = char
 		end
 	end

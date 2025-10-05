@@ -68,6 +68,7 @@ function create()
 	}, 12)
 	bgTrees:play('treeLoop')
 	bgTrees:setScrollFactor(0.85, 0.85)
+	bgTrees:updateHitbox()
 	add(bgTrees)
 	bgTrees.antialiasing = false
 

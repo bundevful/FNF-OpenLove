@@ -65,9 +65,8 @@ function update(dt)
 				startedMoving = true
 				if state.gf then
 					if state.gf.anim.curAnim.name ~= "hairBlow" then
-						state.gf:playAnim('hairBlow')
+						state.gf:playAnim('hairBlow', true, nil, true)
 					end
-					state.gf.lastHit = PlayState.conductor.time - 380
 				end
 				game.camera:shake(0.001, 1)
 				state.camHUD:shake(0.001, 1)
@@ -88,7 +87,7 @@ function update(dt)
 				if phillyTrain.x < -4000 and trainFinishing then
 					if state.gf then
 						state.gf.danced = true -- Sets head to the correct position once the animation ends
-						state.gf:playAnim('hairFall')
+						state.gf:playAnim('hairFall', nil, nil, true)
 					end
 					phillyTrain.x = game.width + 200
 					trainMoving = false

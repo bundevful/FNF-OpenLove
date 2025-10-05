@@ -10,21 +10,18 @@ local fgSprites
 
 function preload()
 	local assets = {
-	    {"image", SCRIPT_PATH .. "tankSky"},
-	    {"image", SCRIPT_PATH .. "tankClouds"},
-	    {"image", SCRIPT_PATH .. "tankMountains"},
-	    {"image", SCRIPT_PATH .. "tankBuildings"},
-	    {"image", SCRIPT_PATH .. "tankRuins"},
-	    {"image", SCRIPT_PATH .. "tankGround"},
-	    {"image", SCRIPT_PATH .. "smokeLeft"},
-	    {"image", SCRIPT_PATH .. "smokeRight"},
-	    {"image", SCRIPT_PATH .. "tankWatchtower"},
-	    {"image", SCRIPT_PATH .. "tankRolling"},
+		{"image", SCRIPT_PATH .. "tankSky"},
+		{"image", SCRIPT_PATH .. "tankClouds"},
+		{"image", SCRIPT_PATH .. "tankMountains"},
+		{"image", SCRIPT_PATH .. "tankBuildings"},
+		{"image", SCRIPT_PATH .. "tankRuins"},
+		{"image", SCRIPT_PATH .. "tankGround"},
+		{"image", SCRIPT_PATH .. "smokeLeft"},
+		{"image", SCRIPT_PATH .. "smokeRight"},
+		{"image", SCRIPT_PATH .. "tankWatchtower"},
+		{"image", SCRIPT_PATH .. "tankRolling"},
+		{"image", SCRIPT_PATH .. "tanks"}
 	}
-	for i = 0, 5 do
-	    table.insert(assets, {"image", SCRIPT_PATH .. "tank" .. i})
-	end
-
 	return assets
 end
 
@@ -114,12 +111,22 @@ function create()
 		{-500, 650, 1.7}, {-300, 750, 2, 0.2}, {450, 940},
 		{1300, 1200, 3.5, 2.5}, {1300, 900}, {1620, 700}
 	}
+	local anims = {
+		"fg tankhead far right instance 1",
+		"fg tankhead 5 instance 1",
+		"fg man 3 instance 1",
+		"fg tankhead 4 instance 1",
+		"fg tankman bobbin 3 instance 1",
+		"fg tankhead far right instance 1"
+	}
+
+	local sparrow = paths.getSparrowAtlas(SCRIPT_PATH .. 'tanks')
 	for i = 0, 5 do
 		local info = data[i + 1]
 		local fgTank = Sprite(info[1], info[2])
-		fgTank:setFrames(paths.getSparrowAtlas(SCRIPT_PATH .. 'tank' .. i))
+		fgTank:setFrames(sparrow)
 		fgTank:setScrollFactor(info[3] or 1.5, info[4] or 1.5)
-		fgTank:addAnimByPrefix('fg', 'fg', 24, false)
+		fgTank:addAnimByPrefix('fg', anims[i + 1], 24, false)
 		fgTank:play('fg', true)
 		fgSprites:add(fgTank)
 	end
