@@ -6,6 +6,11 @@ function vslice.parse(data, name)
 	Parser.pset(char, "sing_duration", data.singTime)
 	Parser.pset(char, "flip_x", data.flipX)
 	Parser.pset(char, "sprite", data.assetPath:gsub("shared:", ""))
+	Parser.pset(char, "antialiasing", not data.isPixel)
+
+	Parser.pset(char, "position", data.offsets)
+	Parser.pset(char, "camera_points", data.cameraOffsets)
+	Parser.pset(char, "scale", data.scale)
 
 	char.voice_suffix = name:gsub("-[^-]*$", "")
 
