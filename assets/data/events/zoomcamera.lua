@@ -26,12 +26,13 @@ function event(data)
 	local mode = data.mode or "direct"
 	local direct = (mode == "direct")
 	local ease = data.ease or "linear"
+	local dir = data.easeDir
 
 	if ease == "INSTANT" then
 		cameraZoom(zoom, 0, direct)
 	else
 		local dur = conductor.stepCrotchet * duration / 1000
-		local daEase = Ease[ease]
+		local daEase = dir and Ease[ease .. dir] or Ease[ease]
 
 		if daEase == nil then
 			print("[CAMERAZOOM EVENT] Invalid ease function: " .. ease)

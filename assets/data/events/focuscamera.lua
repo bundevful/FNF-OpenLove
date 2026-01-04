@@ -23,7 +23,7 @@ function event(params)
 				state:cameraMovement(
 					ox,
 					oy,
-					params.v.ease,
+					params.v.easeDir and params.v.ease .. params.v.easeDir or params.v.ease,
 					stepCrotchet * params.v.duration / 1000
 				)
 			end
