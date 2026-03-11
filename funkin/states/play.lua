@@ -123,9 +123,9 @@ function PlayState:preload()
 
 	self.ratings = {
 		{name = "sick", time = 0.045, score = 350, splash = true,  mod = 1},
-		{name = "good", time = 0.090, score = 200, splash = false, mod = 1},
-		{name = "bad",  time = 0.135, score = 100, splash = false, mod = .5,  resetCombo = true},
-		{name = "shit", time = -1,    score = 50,  splash = false, mod = .25, resetCombo = true}
+		{name = "good", time = 0.090, score = 200, splash = false, mod = 0.7},
+		{name = "bad",  time = 0.135, score = 100, splash = false, mod = 0.4, resetCombo = true},
+		{name = "shit", time = -1,    score = 50,  splash = false, mod = 0,   resetCombo = true}
 	}
 	for _, rating in ipairs(self.ratings) do
 		table.insert(list, skinPath("image", rating.name))
