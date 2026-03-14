@@ -186,7 +186,10 @@ end
 function Character:sing(dir, type, force)
 	local anim = "sing" .. Character.directions[dir + 1]:upper()
 	if type then
-		anim = anim .. (type == "miss" and type or "-" .. type)
+		local typedAnim = anim .. (type == "miss" and type or "-" .. type)
+		if self.anim:has(typedAnim) then
+			anim = typedAnim
+		end
 	end
 	if self.anim:has(anim) then
 		self:playAnim(anim, force ~= false)

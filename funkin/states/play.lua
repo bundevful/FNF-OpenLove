@@ -928,7 +928,7 @@ function PlayState:update(dt)
 
 		for _, note in ipairs(nf:getNotes(time, nil, true)) do
 			local hasInput = not isPlayer or controls:down(PlayState.keysControls[note.direction])
-			local char = note.character or nf.character
+			local char = note.character or (note.gf and self.gf or nf.character)
 
 			if note.wasGoodHit then
 				if hasInput then note.lastPress = time end
@@ -1083,7 +1083,7 @@ function PlayState:goodNoteHit(note, time)
 		note.parent, note.direction, note.sustain
 	local event = self.scripts:event("onNoteHit",
 		Events.NoteHit(notefield, note,
-			note.character or notefield.character, rating))
+			note.character or (note.gf and self.gf or notefield.character), rating))
 
 	if not event.cancelled and not note.wasGoodHit then
 		note.wasGoodHit = true
@@ -1160,7 +1160,7 @@ function PlayState:goodSustainHit(note, time, fullyHeldSustain)
 		note.parent, note.direction, fullyHeldSustain ~= nil
 	local event = self.scripts:event("onSustainHit",
 		Events.NoteHit(notefield, note,
-			note.character or notefield.character))
+			note.character or (note.gf and self.gf or notefield.character)))
 	if not event.cancelled and not note.wasGoodSustainHit then
 		note.wasGoodSustainHit = true
 		if notefield.lastSustain == note then notefield.lastSustain = nil end
@@ -1196,7 +1196,7 @@ function PlayState:miss(note, dir)
 	local notefield = ghostMiss and note or note.parent
 	local event = self.scripts:event(ghostMiss and "onMiss" or "onNoteMiss",
 		Events.Miss(notefield, dir, ghostMiss and nil or note,
-			note.character or notefield.character))
+			note.character or (note.gf and self.gf or notefield.character)))
 	if not event.cancelled and (ghostMiss or not note.tooLate) then
 		if not ghostMiss then
 			note.tooLate = true
