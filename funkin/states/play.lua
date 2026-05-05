@@ -1115,7 +1115,7 @@ function PlayState:goodNoteHit(note, time)
 		if receptor then
 			if not event.strumGlowCancelled then
 				receptor:play("confirm", true)
-				if not note.sustain then receptor.holdTime = 0.15 end
+				if not note.sustain then receptor.holdTime = notefield.bot and 0.15 or 0.25 end
 				if ClientPrefs.data.noteSplash and notefield.canSpawnSplash and rating.splash then
 					receptor:spawnSplash()
 				end
