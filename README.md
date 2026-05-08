@@ -1,4 +1,4 @@
-# ![](art/icon.png) FNF Löve
+# ![](art/icon.png) FNF LÖVE
 
 ![](art/funkin_logo.png)
 
@@ -8,25 +8,14 @@
 
 [![Discord Banner](https://invidget.switchblade.xyz/eFFgHz7X8N)](https://discord.gg/eFFgHz7X8N)
 
+## Contributing
+
+Please follow our [contributing guidelines](CONTRIBUTING.md) while contributing to this project.
+
 ## Dev Team
 
 - [Stilic (owner)](https://github.com/Stilic)
 - [Victor Kaoy](https://github.com/ViKaoy)
 - [TehPuertoRicanSpartan](https://github.com/TehPuertoRicanSpartan)
-- [mrmeep64](https://github.com/Arm4GeDon)
 - [Shirobuu](https://github.com/Shirobuuh)
-- [FowluhhDev](https://github.com/skyebleuu)
-
-## Libraries
-
-- [baton](https://github.com/tesselode/baton)\*
-- [classic](https://github.com/rxi/classic)\*
-- [gamestate](https://github.com/vrld/hump/blob/master/gamestate.lua)\*
-- [json](https://github.com/actboy168/json.lua)\*
-- [lua-discordRPC](https://github.com/pfirsich/lua-discordRPC)\*
-- [DiscordIPC-Lua](https://github.com/GuglioIsStupid/DiscordIPC-Lua)\*
-- [Lua-Simple-XML-Parser](https://github.com/Cluain/Lua-Simple-XML-Parser)\*
-- [loveanimate](https://github.com/swordcube/loveanimate)\*
-- [lua-https](https://github.com/love2d/lua-https)
-
-* Was modified for our needs.
+- [Dawn Fowler](https://github.com/fowluhhdevbcfunny)
