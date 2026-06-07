@@ -39,6 +39,8 @@ function Notefield:new(x, y, keys, skin, character, vocals, speed)
 
 	self.noNoteRender = false
 
+	self.state = game.getState()
+
 	self.__topSprites = Group()
 	for i = 1, keys do self:makeLane(i) end
 	self:add(self.__topSprites)
