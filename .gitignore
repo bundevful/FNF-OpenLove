@@ -36,5 +36,6 @@ luac.out
 # Custom
 *.lnk
 *.sublime-workspace
+addons
 mods
 release
