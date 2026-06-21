@@ -1,10 +1,8 @@
 local ffi, discordRPClib = require "ffi"
 local OS = love.system.getOS()
 if OS == "Windows" then
-	if not jit.arch == "arm64" and love.filesystem.getInfo("lib/windows/discord-rpc.dll", "file") then
+	if love.filesystem.getInfo("lib/windows/discord-rpc.dll", "file") then
 		discordRPClib = "lib/windows/discord-rpc"
-	elseif jit.arch == "arm64" and love.filesystem.getInfo("lib/windows/discord-rpc-x86.dll", "file") then
-		discordRPClib = "lib/windows/discord-rpc-x86"
 	else
 		discordRPClib = "discord-rpc"
 	end
@@ -27,7 +25,6 @@ if discordRPClib then success, v = pcall(ffi.load, discordRPClib) end
 if success then
 	discordRPClib = v
 else
-	print("FAILED TO LOAD DISCORDRPC: ", v)
 	local __NULL__ = function() end
 	return setmetatable({}, {__index = function() return __NULL__ end})
 end

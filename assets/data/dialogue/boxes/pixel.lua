@@ -1,4 +1,4 @@
-local bgFade, music, kindb
+local bgFade, music
 
 function create(_, kind)
 	local color = kind == "thorns" and Color.BLACK or Color.convert({179, 223, 216})
@@ -11,11 +11,7 @@ function create(_, kind)
 		music = game.sound.play(paths.getMusic('gameplay/Lunchbox'), 0.8, true, true)
 	end
 
-	kindb = kind
-end
-
-function postCreate()
-	Timer.wait(kindb == "angry" and 1.5 or 2, function()
+	Timer.wait(kind == "angry" and 1.5 or 2, function()
 		for loop = 1, 5 do
 			Timer.wait(0.83 * loop, function()
 				bgFade.alpha = bgFade.alpha + (1 / 5) * 0.7
@@ -26,9 +22,9 @@ function postCreate()
 		end
 		startDialogue()
 	end)
-	self:startDialogue()
-	return Event_Cancel
 end
+
+function postCreate() return Event_Cancel end
 
 function finishDialogue()
 	util.playSfx(nextSound)

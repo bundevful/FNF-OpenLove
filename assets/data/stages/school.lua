@@ -1,19 +1,7 @@
 local BackgroundGirls = require "backgroundgirls"
 
-local bgGirls, cam
+local bgGirls
 local floor = math.floor
-
-function preload()
-	return {
-	    {"image", SCRIPT_PATH .. "weebSky"},
-	    {"image", SCRIPT_PATH .. "bgFreaks"},
-	    {"image", SCRIPT_PATH .. "weebSchool"},
-	    {"image", SCRIPT_PATH .. "weebStreet"},
-	    {"image", SCRIPT_PATH .. "weebTreesBack"},
-	    {"image", SCRIPT_PATH .. "weebTrees"},
-	    {"image", SCRIPT_PATH .. "petals"}
-	}
-end
 
 function create()
 	camZoom = 1
@@ -22,21 +10,12 @@ function create()
 	game.camera.pixelPerfect = true
 	game.camera.antialiasing = false
 
-	cam = Camera()
-	cam:resize(floor(1280 / 4), floor(720 / 4), 1, 1, true)
-	cam.pixelPerfect = true
-	cam.antialiasing = false
-	table.insert(game.cameras.list, 2, cam)
+	boyfriendPos = {x = 1080, y = 60}
+	gfPos = {x = 580, y = 120}
+	dadPos = {x = 20, y = -400}
 
-	boyfriendPos:set(1080, 60)
-	gfPos:set(580, 90)
-	dadPos:set(0, -400)
-
-	boyfriendCam:set(-20, 0)
-	dadCam:set(80, 50)
-	gfCam:set(gfCam.x + 40, gfCam.y)
-	-- gfCam.x = gfCam.x + 40
-	-- gfCam.y = gfCam.y - 4
+	boyfriendCam = {x = 85, y = 100}
+	dadCam = {x = -75, y = 150}
 
 	local bgSky = Sprite()
 	bgSky:loadTexture(paths.getImage(SCRIPT_PATH .. 'weebSky'))
@@ -68,7 +47,6 @@ function create()
 	}, 12)
 	bgTrees:play('treeLoop')
 	bgTrees:setScrollFactor(0.85, 0.85)
-	bgTrees:updateHitbox()
 	add(bgTrees)
 	bgTrees.antialiasing = false
 
@@ -85,8 +63,6 @@ function create()
 	bgGirls:updateHitbox()
 	bgGirls.antialiasing = false
 	add(bgGirls)
-
-	refresh()
 end
 
 function postCreate()
@@ -100,8 +76,10 @@ function postCreate()
 				m.cameraPosition.x, m.cameraPosition.y =
 					floor(m.cameraPosition.x / 6), floor(m.cameraPosition.y / 6)
 			end
-			for _, anim in pairs(m.animation:getList()) do
-				anim.offset:set(floor(anim.offset.x / 6), floor(anim.offset.y / 6))
+			if m.animOffsets then
+				for _, n in pairs(m.animOffsets) do
+					n.x, n.y = floor(n.x / 6), floor(n.y / 6)
+				end
 			end
 		end
 	end
@@ -110,36 +88,10 @@ function postCreate()
 	dad:finish()
 	cameraMovement(getCameraPosition(camTarget))
 	game.camera:follow(camFollow, nil)
-
-	judgeSprites.cameras = {cam}
-	judgeSprites:setPosition(cam.width / 4, 264 / 4)
-	judgeSprites.area = {width = 135, height = 30}
-end
-
-function postGameOverCreate()
-	game.cameras.remove(cam)
-	local m = game.getState(true).boyfriend
-	m.scale:set(1, 1)
-	m:updateHitbox()
-	m.x, m.y = floor(m.x / 6), floor(m.y / 6)
-	if m.cameraPosition then
-		m.cameraPosition.x, m.cameraPosition.y =
-			floor(m.cameraPosition.x / 6), floor(m.cameraPosition.y / 6)
-	end
-	local x, y = m:getGraphicMidpoint()
-	game.getState(true).camFollow = Point(x - 30, y - 9)
-	for _, anim in pairs(m.animation:getList()) do
-		anim.offset:set(floor(anim.offset.x / 6), floor(anim.offset.y / 6))
-	end
-end
-
-function postGameOverUpdate()
-	game.camera.zoom = 1
 end
 
 function postUpdate()
 	game.camera.zoom = math.truncate(game.camera.zoom, 3)
-	cam.zoom = math.truncate(camHUD.zoom, 3)
 end
 
 function beat(b) bgGirls:dance() end

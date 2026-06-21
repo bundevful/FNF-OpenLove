@@ -13,7 +13,7 @@ function StoryCharacter:changeCharacter(char)
 	self.character = char
 	self.visible = true
 
-	self.scale:set(1, 1)
+	self.scale = {x = 1, y = 1}
 	self:updateHitbox()
 
 	self.hasConfirmAnimation = false
@@ -21,14 +21,14 @@ function StoryCharacter:changeCharacter(char)
 		[''] = function() self.visible = false end,
 		default = function()
 			local path = 'data/weeks/characters/' .. self.character
-			if not paths.exists(paths.getPath(path .. '.json'), "file") then
+			if not (paths.exists(paths.getMods(path .. '.json'), "file") or
+					paths.exists(paths.getPath(path .. '.json'), "file")) then
 				path = 'data/weeks/characters/bf'
 			end
 
 			local charFile = paths.getJSON(path)
 			self:setFrames(paths.getSparrowAtlas(
 				'menus/storymenu/characters/' .. charFile.sprite))
-			self.animation:reset()
 			self:addAnimByPrefix('idle', charFile.idle_anim, 24)
 
 			local confirmAnim = charFile.confirm_anim
@@ -43,7 +43,7 @@ function StoryCharacter:changeCharacter(char)
 			self.flipX = (charFile.flipX == true)
 
 			if charFile.scale ~= 1 then
-				self.scale:set(charFile.scale, charFile.scale)
+				self.scale = {x = charFile.scale, y = charFile.scale}
 				self:updateHitbox()
 			end
 			self.offset.x, self.offset.y = charFile.position[1],

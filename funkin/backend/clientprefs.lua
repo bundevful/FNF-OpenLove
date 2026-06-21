@@ -1,6 +1,5 @@
 local ClientPrefs = {}
 
-local desktop = game.system.device == "Desktop"
 ClientPrefs.data = {
 	-- controls
 	asyncInput = false,
@@ -16,11 +15,6 @@ ClientPrefs.data = {
 	botplayMode = false,
 	playback = 1,
 	gameOverInfos = true,
-
-	-- gameplay - notes
-	splitReceptors = not desktop,
-	splitWidth = desktop and 448 or 900,
-	noteWidth = desktop and 112 or 190,
 
 	-- audio
 	pauseMusic = "railways",
@@ -38,19 +32,13 @@ ClientPrefs.data = {
 	shader = true,
 	fullscreen = false,
 	resolution = 1,
-	vsync = true,
-	margin = desktop and 0 or 76,
+	toastPrints = false,
 
 	-- stats
 	showFps = false,
 	showRender = false,
 	showMemory = false,
 	showDraws = false,
-
-	-- toast messages
-	showToastErrors = true,
-	showToastDeprecations = true,
-	showToastPrints = false,
 }
 
 ClientPrefs.controls = {

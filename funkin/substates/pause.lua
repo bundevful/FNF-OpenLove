@@ -1,31 +1,30 @@
 local PauseSubstate = Substate:extend("PauseSubstate")
 
-function PauseSubstate:new()
+function PauseSubstate:new(cutscene)
 	PauseSubstate.super.new(self)
 
-	self.menuItems = {"Resume", "Restart song", "Options", "Exit to menu"}
-	if #PlayState.SONG.difficulties > 1 then
+	self.menuItems = {"Resume", (cutscene and "Skip cutscene" or "Restart song"),
+		"Options", "Exit to menu"}
+	if #PlayState.SONG.difficulties > 1 and not cutscene then
 		table.insert(self.menuItems, 3, "Change difficulty")
 	end
+	self.cutscene = cutscene
 
 	self.blockInput = false
-	self.lock = false
 
 	self:loadMusic()
 
 	self.bg = Graphic(0, 0, game.width, game.height, Color.BLACK)
 	self.bg.alpha = 0
-	self.bg.scrollFactor:set()
+	self.bg:setScrollFactor()
 	self:add(self.bg)
 
-	self.menuList = MenuList(paths.getSound('scrollMenu'), false,
-		love.system.getDevice() == "Mobile" and "mobile" or nil)
+	self.menuList = MenuList(paths.getSound('scrollMenu'))
 	self.menuList.selectCallback = bind(self, self.selectOption)
 	self:add(self.menuList)
 
 	self.diffTextList = AtlasText(18, 18, "Change difficulty", "bold")
-	self.diffList = MenuList(paths.getSound('scrollMenu'), false,
-		love.system.getDevice() == "Mobile" and "mobile" or nil)
+	self.diffList = MenuList(paths.getSound('scrollMenu'))
 	self.diffList.selectCallback = bind(self, self.selectDifficulty)
 	self.diffList.lock, self.diffList.open = true, false
 
@@ -42,7 +41,7 @@ function PauseSubstate:new()
 
 	self.menuList:changeSelection()
 
-	local txt, font = PlayState.SONG.metadata.displayName or "?", paths.getFont("vcr.ttf", 32)
+	local txt, font = PlayState.SONG.song or "?", paths.getFont("vcr.ttf", 32)
 	self.songText = Text(0, 15, txt, font)
 	self.songText.x = game.width - self.songText:getWidth() - 28
 	self.songText.alpha = 0
@@ -79,36 +78,52 @@ function PauseSubstate:enter()
 		0.4, {ease = 'quartInOut', startDelay = 0.4})
 
 	if love.system.getDevice() == "Mobile" then
-		self.buttons = util.createButtons("b")
+		self.buttons = VirtualPadGroup()
+		local w = 134
+		local gw, gh = game.width, game.height
+
+		local down = VirtualPad("down", 0, gh - w)
+		local up = VirtualPad("up", 0, down.y - w)
+
+		local enter = VirtualPad("return", gw - w, down.y)
+		enter.color = Color.LIME
+		local back = VirtualPad("escape", enter.x - w, down.y)
+		back.color = Color.RED
+
+		local vup = VirtualPad("kp+", gw - w, 0)
+		local vdown = VirtualPad("kp-", gw - w, w)
+
+		self.buttons:add(down)
+		self.buttons:add(up)
+		self.buttons:add(enter)
+		self.buttons:add(back)
+		self.buttons:add(vup)
+		self.buttons:add(vdown)
 		self:add(self.buttons)
-
-		self.parent:remove(self.parent.pauseButton)
-		self:add(self.parent.pauseButton)
-		Tween.cancelTweensOf(self.parent.pauseButton)
-		Tween.tween(self.parent.pauseButton, {alpha = 0}, 0.6, {ease = Ease.quartOut, startDelay = 0.5});
 	end
-end
-
-function PauseSubstate:resetState()
-	self.lock = true
-
-	self.load = LoadScreen(getmetatable(game.getState())())
-	self:add(self.load)
 end
 
 function PauseSubstate:selectDifficulty(daChoice)
 	PlayState.loadSong(PlayState.SONG.song, PlayState.SONG.difficulties[
 		table.find(PlayState.SONG.difficulties, tostring(daChoice))])
-	self:resetState()
+	game.resetState(true)
 end
 
 function PauseSubstate:selectOption(daChoice)
-	if self.lock or self.blockInput then return end
+	if self.blockInput then return end
 
 	switch(tostring(daChoice):lower(), {
 		["resume"] = function() self:close() end,
 		["restart song"] = function()
-			self:resetState()
+			game.resetState(true)
+		end,
+		["skip cutscene"] = function()
+			if self.cutscene.isEnd then
+				self.parent:endSong(true)
+			else
+				PlayState.seenCutscene = true
+				game.resetState(true)
+			end
 		end,
 		["change difficulty"] = function()
 			self:openDifficultyMenu()
@@ -124,7 +139,7 @@ function PauseSubstate:selectOption(daChoice)
 				self.blockInput = false
 			end)
 			self.optionsUI.applySettings = bind(self, self.onSettingChange)
-			self.optionsUI.scrollFactor:set()
+			self.optionsUI:setScrollFactor()
 			self.optionsUI:screenCenter()
 			self:add(self.optionsUI)
 
@@ -133,7 +148,7 @@ function PauseSubstate:selectOption(daChoice)
 			self.blockInput = true
 		end,
 		["exit to menu"] = function()
-			game.sound.music.pitch = 1
+			game.sound.music:setPitch(1)
 			self.music:stop()
 			util.playMenuMusic()
 			PlayState.chartingMode = false
@@ -156,14 +171,6 @@ function PauseSubstate:selectOption(daChoice)
 end
 
 function PauseSubstate:update(dt)
-	if self.load then
-		if paths.async.getProgress() == 1 then
-			local state = self.load.nextState
-			state.skipTransIn = true
-			self.parent.skipTransOut = true
-			game.switchState(state)
-		end
-	end
 	PauseSubstate.super.update(self, dt)
 
 	if controls:pressed("back") and self.diffList.open then
@@ -172,7 +179,7 @@ function PauseSubstate:update(dt)
 end
 
 function PauseSubstate:openDifficultyMenu()
-	if self.diffList.open or self.lock then return end
+	if self.diffList.open then return end
 	util.playSfx(paths.getSound("scrollMenu"))
 
 	self:add(self.diffList)
@@ -202,7 +209,7 @@ function PauseSubstate:openDifficultyMenu()
 end
 
 function PauseSubstate:closeDifficultyMenu()
-	if self.diffList.closing or self.lock then return end
+	if self.diffList.closing then return end
 	util.playSfx(paths.getSound("cancelMenu"))
 
 	self.diffList.closing = true
@@ -267,14 +274,6 @@ function PauseSubstate:loadPauseMusic()
 end
 
 function PauseSubstate:close()
-	if self.parent.pauseButton then
-		self:remove(self.parent.pauseButton)
-		self.parent:add(self.parent.pauseButton)
-		Tween.cancelTweensOf(self.parent.pauseButton)
-		Tween.tween(self.parent.pauseButton, {alpha = 1}, 0.25, {ease = Ease.quartOut});
-		Tween.tween(self.parent.pauseCircle, {alpha = 0.1}, 0.25, {ease = Ease.quartOut});
-	end
-
 	self.music:stop()
 	self.music:destroy()
 

@@ -1,6 +1,6 @@
 local ModdingUtil = {}
 
-local decodeJSON = (loxreq "lib.json").decode
+local decodeJSON = (require "lib.json").decode
 
 local function createMeta(name)
 	return {
@@ -37,8 +37,7 @@ end
 function ModdingUtil.getMeta(root, name)
 	local path = root .. "/" .. name .. "/meta.json"
 	local onErr = function(r)
-		r = r:gsub("^.-:%d+: ERROR: ", "")
-		Logger.log("error", name .. "'s JSON metadata returned an error: " .. r)
+		print(name .. "'s JSON metadata returned an error: " .. r)
 	end
 
 	if paths.exists(root, "directory") and paths.exists(path, "file") then

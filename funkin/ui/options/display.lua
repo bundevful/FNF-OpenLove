@@ -10,12 +10,8 @@ local data = {
 		ClientPrefs.data.antialiasing = value
 		Object.defaultAntialiasing = value
 	end},
-	{"lowQuality", "Low quality",  "boolean"},
-	{"shader",     "Shaders",      "boolean"},
-	{"margin",     "Screen margin", "number", function(add)
-		local value = math.clamp(ClientPrefs.data.margin + add, 0, game.width / 6)
-		ClientPrefs.data.margin = value
-	end},
+	{"lowQuality", "Low quality", "boolean"},
+	{"shader",     "Shaders",     "boolean"},
 
 	{"WINDOW"},
 	{"fullscreen", "Fullscreen", "boolean", function()
@@ -83,12 +79,16 @@ local data = {
 		return math.truncate(select(3, love.window.getMode()).refreshrate, 3) == value and
 			("%shz"):format(tostring(value)) or tostring(value)
 	end},
-	{"vsync", "VSync", "boolean", function()
-		local value = not ClientPrefs.data.vsync
-		ClientPrefs.data.vsync = value
-		love.vsync = value
+	{"parallelUpdate", "Parallel update", "boolean", function()
+		local value = not ClientPrefs.data.parallelUpdate
+		ClientPrefs.data.parallelUpdate = value
+		love.parallelUpdate = value
 	end},
 	{"STATS"},
+	{"toastPrints", "Toast prints", "boolean", function()
+		local value = not ClientPrefs.data.toastPrints
+		ClientPrefs.data.toastPrints = value
+	end},
 	{"showFps", "Show FPS", "boolean", function()
 		local value = not ClientPrefs.data.showFps
 		ClientPrefs.data.showFps = value
@@ -109,26 +109,14 @@ local data = {
 		ClientPrefs.data.showDraws = value
 		game.statsCounter.showDraws = value
 	end},
-	{"TOASTS"},
-	{"showToastPrints", "Show prints", "boolean", function()
-		local value = not ClientPrefs.data.showToastPrints
-		ClientPrefs.data.showToastPrints = value
-		Toast.showPrints = value
-	end},
-	{"showToastErrors", "Show errors", "boolean", function()
-		local value = not ClientPrefs.data.showToastErrors
-		ClientPrefs.data.showToastErrors = value
-		Toast.showErrors = value
-	end},
-	{"showToastDeprecations", "Show deprecations", "boolean", function()
-		local value = not ClientPrefs.data.showToastDeprecations
-		ClientPrefs.data.showToastDeprecations = value
-		Toast.showDeprecations = value
-	end},
 }
 
 if love.system.getDevice() == "Mobile" then
-	table.remove(data, 7)
+	for _, v in pairs(data) do
+		if #v > 1 and v[1] == "fullscreen" or v[1] == "resolution" then
+			table.delete(data, v)
+		end
+	end
 end
 
 local Display = Settings:base("Display", data)

@@ -1,68 +1,69 @@
 local vslice = {name = "V-Slice"}
 
-local stage
-local switchStage = {
-	["mainStage"] = function() stage = "stage" end,
-	["spookyMansion"] = function() stage = "spooky" end,
-	["phillyTrain"] = function() stage = "philly" end,
-	["limoRide"] = function() stage = "limo" end,
-	["mallXmas"] = function() stage = "mall" end,
-	["mallEvil"] = function() stage = "mall-evil" end,
-	["schoolEvil"] = function() stage = "school-evil" end,
-	["tankmanBattlefield"] = function() stage = "tank" end
-}
-
-local function updateFromMeta(data, meta)
-	if not meta then return end
-
+local function getFromMeta(meta, tbl)
 	assert(meta.playData ~= nil, "Not a valid V-Slice metadata")
 	local info = meta.playData
 
-	-- Parser.pset(data, "song", meta.songName or meta.song)
-
-	stage = nil
-	switch(info.stage, switchStage)
-	Parser.pset(data, "stage", stage or info.stage)
+	Parser.pset(tbl, "song", meta.songName or meta.song)
+	Parser.pset(tbl, "stage", info.stage)
 
 	local notestyle = info.noteStyle == "funkin" and
 		"default" or info.noteStyle == "pixel" and "default-pixel"
 		or info.noteStyle
-	Parser.pset(data, "skin", notestyle)
-	Parser.pset(data, "difficulties", info.difficulties)
-	Parser.pset(data, "timeChanges", meta.timeChanges)
+	Parser.pset(tbl, "skin", notestyle)
+
+	Parser.pset(tbl, "difficulties", info.difficulties)
+	Parser.pset(tbl, "timeChanges", meta.timeChanges)
 
 	info = info.characters
-	Parser.pset(data, "player1", info.player)
-	Parser.pset(data, "player2", info.opponent)
-	Parser.pset(data, "gfVersion", info.girlfriend)
+	Parser.pset(tbl, "player1", info.player)
+	Parser.pset(tbl, "player2", info.opponent)
+	Parser.pset(tbl, "gfVersion", info.girlfriend)
 end
 
-local function processNotes(notes)
-	local dad, bf, isPlayer = {}, {}
-	for _, n in ipairs(notes) do
-		isPlayer = not (tonumber(n.d or 0) > 3)
-		n.d = tonumber(n.d or 0) % 4
-		n.k = n.k == "mom" and "alt" or n.k
-		table.insert(isPlayer and bf or dad, n)
+local function getStuff(data)
+	local dad, bf = {}, {}
+
+	for _, n in ipairs(data) do
+		local column = tonumber(n.d)
+		local kind = n.k == "mom" and "alt" or n.k
+		local newNote = {
+			t = tonumber(n.t),
+			d = column % 4,
+			l = tonumber(n.l) or 0,
+			k = kind
+		}
+		table.insert(column > 3 and dad or bf, newNote)
 	end
 
 	return {enemy = dad, player = bf}
 end
 
-function vslice.parse(data, events, meta, diff)
-	local scrollspeed, notes, events = data.scrollSpeed, data.notes, data.events
-	for k, _ in pairs(data) do data[k] = nil end
-	updateFromMeta(data, meta)
+function vslice.parse(data, _, meta, diff)
+	local chart = Parser.getDummyChart()
 
-	if scrollspeed and diff then
-		data.speed = scrollspeed[diff:lower()] or scrollspeed.default or 1
+	if meta then getFromMeta(meta, chart) end
+
+	if chart.timeChanges then
+		-- todo rework this and rework conductor too maybe??
+		for i, c in ipairs(chart.timeChanges) do
+			if c.t <= 0 then
+				chart.bpm = c.bpm
+				table.remove(chart.timeChanges, i)
+				break
+			end
+		end
 	end
 
-	local diffnotes = notes and notes[diff:lower()] or nil
-	data.notes = diffnotes and processNotes(diffnotes) or {enemy = {}, player = {}}
-	data.events = events or {}
+	if data.notes[diff:lower()] then
+		local speed = data.scrollSpeed and (data.scrollSpeed[diff:lower()] or
+			data.scrollSpeed.default) or 1
+		chart.speed = speed
+		chart.notes, chart.events =
+			getStuff(data.notes[diff:lower()]), data.events
+	end
 
-	return data
+	return chart
 end
 
 return vslice

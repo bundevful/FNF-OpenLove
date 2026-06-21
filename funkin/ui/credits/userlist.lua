@@ -12,12 +12,12 @@ function UserList:new(data, width)
 	self.box = Graphic(self.x, self.y, width, game.height - 20, color)
 	self.box.config.round = {24, 24}
 	self.box.alpha = 0.4
-	self.box.scrollFactor:set()
+	self.box:setScrollFactor()
 
 	self.bar = Graphic(self.x, self.y, width - 20, 54, Color.WHITE)
 	self.bar.alpha = 0.2
 	self.bar.config.round = {16, 16}
-	self.bar.scrollFactor:set(0, 1)
+	self.bar:setScrollFactor(0, 1)
 	self:add(self.bar)
 
 	for i = 1, #self.data do
@@ -38,50 +38,29 @@ function UserList:addUsers(name, people, i)
 	box.y = self.lastHeight > 0 and self.lastHeight + 10 or box.y
 	box.alpha = 0.4
 	box.config.round = {18, 18}
-	box.scrollFactor:set(0, 1)
+	box:setScrollFactor(0, 1)
 	self:add(box)
 
 	local title = Text(x + 10, y + 8, name or "Unknown", font)
 	title.y = box.y + (box.height - title:getHeight()) / 2
 	title.limit = box.width - 20
-	title.scrollFactor:set(0, 1)
+	title:setScrollFactor(0, 1)
 	title.alignment = "center"
 	title.antialiasing = false
 	self:add(title)
 
 	local function makeCard(name, icon, i)
-		local img, txt = Sprite(x + 10, box.y + (64 * i + 10))
-		if icon:startsWith("https://") then
-			img:loadTexture(paths.getImage("menus/credits/icons/loading"))
-			img.loading = true
-
-			icon = icon .. "?size=100"
-			paths.async.getImage(icon, function(image, url)
-				if url == icon then
-					img.loading = nil
-					img.angle = 0
-					img:loadTexture(image)
-					img:setGraphicSize(54, 54)
-					img:updateHitbox()
-					if txt and font then
-						txt:setPosition(x + img.x + img.width + 10,
-							img.y + (img.height - txt:getHeight()) / 2)
-					end
-				end
-			end)
-		else
-			img:loadTexture(paths.getImage("menus/credits/icons/" .. icon))
-		end
-
-		img:setGraphicSize(54, 54)
+		local img = Sprite(x + 10, box.y +
+			(64 * i + 10), paths.getImage("menus/credits/icons/" .. icon))
+		img:setGraphicSize(54)
 		img:updateHitbox()
-		img.scrollFactor:set(0, 1)
+		img:setScrollFactor(0, 1)
 		self:add(img)
 
-		txt = Marquee(x + img.x + img.width + 10, y,
+		local txt = Marquee(x + img.x + img.width + 10, y,
 			box.width - img.width - 50, 40, name, font)
 		txt.y = img.y + (img.height - txt:getHeight()) / 2
-		txt.scrollFactor:set(0, 1)
+		txt:setScrollFactor(0, 1)
 		txt.antialiasing = false
 		self:add(txt)
 
@@ -93,7 +72,7 @@ function UserList:addUsers(name, people, i)
 		img, txt = makeCard(people[i].name, people[i].icon, i)
 		self.lastHeight = img.y + img.height + 10
 	end
-	self.bar.x, self.bar.width = txt.x - 10, txt.limit + 20
+	self.bar.x, self.bar.width = txt.x - 10, txt.maxWidth + 20
 end
 
 function UserList:changeSelection(n)
@@ -122,11 +101,6 @@ function UserList:update(dt)
 	UserList.super.update(self, dt)
 	if self.parent then
 		--;self.box.color = self.parent.bg.color
-	end
-	for _, member in pairs(self.members) do
-		if member.loading then
-			member.angle = member.angle + 380 * dt
-		end
 	end
 end
 

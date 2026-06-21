@@ -12,6 +12,7 @@ local data = {
 		local value = math.clamp(ClientPrefs.data.backgroundDim + add, 0, 100)
 		ClientPrefs.data.backgroundDim = value
 	end, percentvalue},
+	-- {"notesBelowHUD", "Notes below HUD", "boolean"},
 	{"flashingLights", "Flashing lights", "boolean"},
 	{"downScroll",    "Down scroll",     "boolean"},
 	{"middleScroll",  "Middle scroll",   "boolean"},
@@ -22,17 +23,8 @@ local data = {
 		local value = math.clamp(ClientPrefs.data.playback + (add * 0.05), 0.1, 5)
 		ClientPrefs.data.playback = value
 	end, function(value) return "x" .. value end},
-
-	{"MIDDLESCROLL RECEPTORS"},
-	{"splitReceptors", "Split receptors", "boolean"},
-	{"splitWidth", "Split width", "number", function(add)
-		local value = math.clamp(ClientPrefs.data.splitWidth + add, 448, game.width)
-		ClientPrefs.data.splitWidth = value
-	end},
-	{"noteWidth", "Receptor width", "number", function(add)
-		local value = math.clamp(ClientPrefs.data.noteWidth + add, 112, 1200)
-		ClientPrefs.data.noteWidth = value
-	end},
+	-- {"timeType",      "Song time type",      "string", {"left", "elapsed"}},
+	{"gameOverInfos", "Show game over info", "boolean"},
 
 	{"AUDIO"},
 	{"pauseMusic",    "Pause music",         "string", {"railways", "breakfast"}},
@@ -60,12 +52,12 @@ local data = {
 		ClientPrefs.data.vocalVolume = value
 	end, percentvalue},
 	{"songOffset", "Song offset", "number"},
-	-- {"calibration", "Calibrate", function(optionsUI)
-		-- if optionsUI.aboutToGoToCalibration then return end
-		-- util.playSfx(paths.getSound('scrollMenu'))
-		-- optionsUI.aboutToGoToCalibration = true
-		-- optionsUI.changingOption = false
-	-- end}
+	{"calibration", "Calibrate", function(optionsUI)
+		if optionsUI.aboutToGoToCalibration then return end
+		util.playSfx(paths.getSound('scrollMenu'))
+		optionsUI.aboutToGoToCalibration = true
+		optionsUI.changingOption = false
+	end}
 }
 
 local Gameplay = Settings:base("Gameplay", data)

@@ -50,7 +50,7 @@ function create()
 	street:loadTexture(paths.getImage(SCRIPT_PATH .. 'street'))
 	self:add(street)
 
-	measure()
+	section()
 end
 
 function update(dt)
@@ -61,12 +61,11 @@ function update(dt)
 		trainFrameTiming = trainFrameTiming + dt
 
 		if trainFrameTiming >= 1 / 24 then
-			if trainSound.time >= 4.7 then
+			if trainSound:tell() >= 4.7 then
 				startedMoving = true
 				if state.gf then
-					if state.gf.anim.curAnim.name ~= "hairBlow" then
-						state.gf:playAnim('hairBlow', true, nil, true)
-					end
+					state.gf:playAnim('hairBlow')
+					state.gf.lastHit = PlayState.conductor.time
 				end
 				game.camera:shake(0.001, 1)
 				state.camHUD:shake(0.001, 1)
@@ -86,8 +85,8 @@ function update(dt)
 
 				if phillyTrain.x < -4000 and trainFinishing then
 					if state.gf then
-						state.gf.danced = true -- Sets head to the correct position once the animation ends
-						state.gf:playAnim('hairFall', nil, nil, true)
+						state.gf.danced = false -- Sets head to the correct position once the animation ends
+						state.gf:playAnim('hairFall')
 					end
 					phillyTrain.x = game.width + 200
 					trainMoving = false
@@ -102,7 +101,7 @@ function update(dt)
 	end
 end
 
-function measure()
+function section()
 	local prevCurLight = curLight
 	repeat curLight = love.math.random(1, #lightColors) until prevCurLight ~= curLight
 

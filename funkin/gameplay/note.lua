@@ -26,8 +26,8 @@ function Note:new(time, direction, sustainTime, type, skin)
 	self.time = time
 	self._targetTime = 0
 
-	self.wasGoodHit, self.wasGoodSustainHit, self.wasFullSustainHit,
-	self.tooLate, self.ignoreNote, self.lastPress = false, false, false, false, false, nil
+	self.wasGoodHit, self.wasGoodSustainHit,
+	self.tooLate, self.ignoreNote, self.lastPress = false, false, false, false, nil
 	self.priority, self.earlyHitMult, self.lateHitMult = 0, 1, 1
 	self.showNote, self.showNoteOnHit = true, false
 	self.type = type
@@ -53,7 +53,7 @@ function Note:clone()
 end
 
 function Note:_addAnim(...)
-	(type(select(2, ...)) == 'table' and self.animation.add or self.animation.addByPrefix)(self.animation, ...)
+	(type(select(2, ...)) == 'table' and Sprite.addAnim or Sprite.addAnimByPrefix)(self, ...)
 end
 
 local function makeRGB(color)
@@ -198,9 +198,9 @@ end
 
 function Note:play(anim, force, frame, dontShader, skipName)
 	local toPlay = skipName and anim or anim .. '-note' .. self.direction
-	toPlay = self.animation:has(toPlay) and toPlay or anim
+	toPlay = self.__animations[toPlay] and toPlay or anim
 
-	self.animation:play(toPlay, force, frame)
+	Note.super.play(self, toPlay, force, frame)
 	self:centerOrigin()
 	self:centerOffsets()
 

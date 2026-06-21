@@ -1,5 +1,15 @@
 local funkin = {}
 
+local prn = print
+function print(...)
+	local v = {...}
+	for i = 1, #v do v[i] = tostring(v[i]) end
+	if ClientPrefs and ClientPrefs.data.toastPrints then
+		Toast.new(table.concat(v, "    "))
+	end
+	prn(...)
+end
+
 if love.system.getOS() == "Windows" then
 	WindowDialogue = require "lib.windows.dialogue"
 	WindowUtil = require "lib.windows.util"
@@ -11,37 +21,32 @@ if love.system.getOS() == "Windows" then
 	end
 end
 
-local s, Https = pcall(require, "https")
+local s, module = pcall(require, "https")
 if not s then
-	Https = require "lib.https"
+	module = require "lib.https"
 end
+Https = module
 
-paths = require "funkin.backend.paths"
+paths = require "funkin.paths"
 util = require "funkin.util"
 
-ClientPrefs = require "funkin.backend.clientprefs"
-Throttle = require "funkin.backend.throttle"
 Parser = require "funkin.backend.parser"
-
-Conductor = require "funkin.backend.gameplay.conductor"
-Highscore = require "funkin.backend.gameplay.highscore"
-
-Script = require "funkin.backend.scripts"
-ScriptsHandler = require "funkin.backend.scripts.handler"
--- GlobalScripts = require "funkin.backend.modding.scripts.global"
-require "funkin.backend.scripts.events"
+ClientPrefs = require "funkin.backend.clientprefs"
+Conductor = require "funkin.backend.conductor"
+Highscore = require "funkin.backend.highscore"
+Throttle = require "funkin.backend.throttle"
 
 Mods = require "funkin.backend.modding.mods"
 Addons = require "funkin.backend.modding.addons"
 
-Discord = require "funkin.backend.discord"
+if love.system.getDevice() == "Desktop" then
+	Discord = require "funkin.backend.discord"
+end
 
-Skin = require "funkin.backend.gameplay.skin"
 Receptor = require "funkin.gameplay.receptor"
 Note = require "funkin.gameplay.note"
 Notefield = require "funkin.gameplay.notefield"
 
-FFT = require "funkin.backend.fft"
 Countdown = require "funkin.gameplay.ui.countdown"
 HealthIcon = require "funkin.gameplay.ui.healthicon"
 HealthBar = require "funkin.gameplay.ui.healthbar"
@@ -54,17 +59,15 @@ Stage = require "funkin.gameplay.stage"
 DialogueBox = require "funkin.gameplay.ui.dialoguebox"
 
 AtlasText = require "funkin.ui.atlastext"
-SpriteButton = require "funkin.ui.spritebutton"
 Marquee = require "funkin.ui.marquee"
 MenuList = require "funkin.ui.menulist"
 Options = require "funkin.ui.options"
 Stickers = require "funkin.ui.stickers"
-LoadScreen = require "funkin.ui.loadscreen"
 
 StatsCounter = require "funkin.ui.statscounter"
 
-LoadState = require 'funkin.states.load'
 CalibrationState = require 'funkin.states.calibration'
+UpdateState = require 'funkin.states.update'
 CreditsState = require "funkin.states.credits"
 TitleState = require "funkin.states.title"
 MainMenuState = require "funkin.states.mainmenu"
@@ -73,7 +76,6 @@ StoryMenuState = require "funkin.states.storymenu"
 FreeplayState = require "funkin.states.freeplay"
 PlayState = require "funkin.states.play"
 
-PauseSubstate = require "funkin.substates.pause"
 GameOverSubstate = require "funkin.substates.gameover"
 
 EditorMenu = require "funkin.ui.editor.editormenu"
@@ -84,7 +86,11 @@ ChartingNote = require "funkin.ui.editor.charting.chartingnote"
 
 Shader = require "funkin.shaders"
 RGBShader = require "funkin.shaders.rgb"
-Video = require "funkin.backend.video"
+Video = require "funkin.gameplay.video"
+
+Script = require "funkin.backend.scripting.script"
+ScriptsHandler = require "funkin.backend.scripting.scriptshandler"
+-- GlobalScripts = require "funkin.backend.scripting.globals"
 
 local TransitionFade = loxreq "transition.transitionfade"
 
@@ -95,41 +101,26 @@ function funkin.load()
 
 	love.window.setTitle(Project.title)
 	love.window.setIcon(love.image.newImageData(Project.icon))
-
 	love.window.setMode(Project.width * res, Project.height * res, {
 		fullscreen = isMobile or ClientPrefs.data.fullscreen,
 		resizable = not isMobile,
+		vsync = 0,
 		usedpiscale = false
 	})
 
-	if Project.adaptableWidth then
-		local sw, sh = love.graphics.getDimensions()
-		local ratio = sw / sh
-		Project.width = math.floor(Project.height * ratio)
-		game.width = Project.width
-		love.window.updateMode(Project.width, Project.height, {
-			fullscreen = isMobile or ClientPrefs.data.fullscreen,
-			resizable = not isMobile,
-			usedpiscale = false
-		})
-	end
-
 	if game.save.data.prefs then
 		love.FPScap = ClientPrefs.data.fps
-		love.vsync = ClientPrefs.data.vsync
+		love.parallelUpdate = ClientPrefs.data.parallelUpdate
+		love.asyncInput = ClientPrefs.data.asyncInput
 		love.autoPause = ClientPrefs.data.autoPause
 	else
 		love.FPScap = math.max(select(3, love.window.getMode()).refreshrate, love.FPScap)
 		ClientPrefs.data.fps = love.FPScap
-		ClientPrefs.data.vsync = love.vsync
-		ClientPrefs.data.resolution = 1
+		ClientPrefs.data.parallelUpdate = love.parallelUpdate
+		ClientPrefs.data.resolution = -1
 	end
 
 	Object.defaultAntialiasing = ClientPrefs.data.antialiasing
-
-	Toast.showPrints = ClientPrefs.data.showToastPrints
-	Toast.showErrors = ClientPrefs.data.showToastErrors
-	Toast.showDeprecations = ClientPrefs.data.showToastDeprecations
 
 	local config = {controls = table.clone(ClientPrefs.controls)}
 	if controls == nil then
@@ -152,11 +143,10 @@ function funkin.load()
 
 	game.onPreStateEnter = function(state)
 		-- GlobalScripts.call("preStateEnter", state)
-		if paths and not game.getState().persistCache and
-			getmetatable(state) ~= getmetatable(game.getState()) then
+		if paths and getmetatable(state) ~= getmetatable(game.getState()) then
 			paths.clearCache()
-			Shader.clear()
 		end
+		Shader.clear()
 	end
 
 	local dimen = love.graphics.getDimensions()
@@ -192,8 +182,6 @@ function funkin.load()
 end
 
 function funkin.update(dt)
-	paths.update(dt)
-
 	controls:update()
 	Throttle:update(dt)
 	Shader.updateTime(dt)
@@ -220,7 +208,6 @@ local function error_printer(msg, layer)
 end
 
 function funkin.throwError(msg)
-	paths.async.stop()
 	pcall(love.errorhandler_quit)
 
 	msg = tostring(msg)

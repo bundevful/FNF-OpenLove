@@ -4,7 +4,7 @@
 		["singLEFT", "note sing left", [], 24, false, [130, -10]],
 		["singRIGHT", "spooky sing right", [], 24, false, [-130, -14]],
 		["singDOWN", "spooky DOWN note", [], 24, false, [-50, -130]],
-		["danceLeft", "spooky dance idle", [0, 2, 12, 14], 12, false, [0, 0]],
+		["danceLeft", "spooky dance idle", [0, 2, 6], 12, false, [0, 0]],
 		["danceRight", "spooky dance idle", [8, 10, 12, 14], 12, false, [0, 0]],
 		["singUP", "spooky UP NOTE", [], 24, false, [-20, 26]]
 	],

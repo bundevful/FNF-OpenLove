@@ -13,7 +13,7 @@ local function getStuff(data, eventData, chart)
 		{}, {}, {}
 
 	if eventData then
-		for i, e in ipairs(eventData.events) do
+		for i, e in ipairs(eventData) do
 			local eevent, eparams
 			if e.name == "Camera Movement" then
 				e.name = "FocusCamera"
@@ -62,24 +62,14 @@ local function getStuff(data, eventData, chart)
 end
 
 function codename.parse(data, events, meta)
-	local chart = Parser.getDummyChart(nil, true)
+	local chart = Parser.getDummyChart()
 
 	if meta then getFromMeta(meta, chart) end
 
 	Parser.pset(chart, "stage", data.stage)
 	Parser.pset(chart, "speed", data.scrollSpeed)
 
-	local timeChanges = {}
-	if events then
-		for _, e in ipairs(events) do
-			if e.name == "BPM Change" then
-				table.insert(timeChanges, Parser.newTimeChange(e.time, e.params[1]))
-			end
-		end
-	end
-	chart.timeChanges = timeChanges
-
-	chart.notes, chart.events = getStuff(data, events, chart)
+	chart.notes, chart.events = getStuff(data, events or data.events, chart)
 
 	return chart
 end

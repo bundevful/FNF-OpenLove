@@ -11,17 +11,15 @@ function HealthIcon:new(icon, isPlayer, health)
 end
 
 function HealthIcon:updateAnimation()
-	if not self.animation.curAnim then return end
-
 	local percent = self.health
 	if not self.isPlayer then percent = 100 - percent end
 	local isLosing = percent < 10
 	if self.isLegacyStyle then
-		self.animation.curAnim.frame = isLosing and 2 or 1
+		self.curFrame = isLosing and 2 or 1
 	else
 		local isWinning = percent > 80
 		local function backToIdleIfFinished()
-			if self.animFinished then self.animation:play("idle") end
+			if self.animFinished then self:play("idle") end
 		end
 		switch(self.curAnim and self.curAnim.name or "idle", {
 			["idle"] = function()
@@ -30,7 +28,7 @@ function HealthIcon:updateAnimation()
 				elseif isWinning then
 					self:fallbackPlay("toWinning", "winning")
 				else
-					self.animation:play("idle")
+					self:play("idle")
 				end
 			end,
 			["winning"] = function()
@@ -55,7 +53,7 @@ function HealthIcon:updateAnimation()
 			end,
 			["fromLosing"] = backToIdleIfFinished,
 			["fromWinning"] = backToIdleIfFinished,
-			["default"] = function() self.animation:play("idle") end
+			["default"] = function() self:play("idle") end
 		})
 	end
 end
@@ -90,8 +88,8 @@ function HealthIcon:changeIcon(icon)
 			self:loadTexture(self.texture, true,
 				math.floor(self.width / 2),
 				math.floor(self.height))
-			self.animation:add("i", {0, 1}, 0)
-			self.animation:play("i")
+			self:addAnim("i", {0, 1}, 0)
+			self:play("i")
 		end
 
 		self.iconOffset = {x = (self.width - 150) / 2, y = (self.height - 150) / 2}
@@ -103,13 +101,13 @@ function HealthIcon:changeIcon(icon)
 	else
 		self:setFrames(isSparrow and paths.getSparrowAtlas(path) or paths.getPackerAtlas(path))
 
-		self.animation:addByPrefix("idle", "idle", 24, true)
-		self.animation:addByPrefix("winning", "winning", 24, true)
-		self.animation:addByPrefix("losing", "losing", 24, true)
-		self.animation:addByPrefix("toWinning", "toWinning", 24, false)
-		self.animation:addByPrefix("toLosing", "toLosing", 24, false)
-		self.animation:addByPrefix("fromWinning", "fromWinning", 24, false)
-		self.animation:addByPrefix("fromLosing", "fromLosing", 24, false)
+		self:addAnimByPrefix("idle", "idle", 24, true)
+		self:addAnimByPrefix("winning", "winning", 24, true)
+		self:addAnimByPrefix("losing", "losing", 24, true)
+		self:addAnimByPrefix("toWinning", "toWinning", 24, false)
+		self:addAnimByPrefix("toLosing", "toLosing", 24, false)
+		self:addAnimByPrefix("fromWinning", "fromWinning", 24, false)
+		self:addAnimByPrefix("fromLosing", "fromLosing", 24, false)
 	end
 
 	self:updateAnimation()
@@ -123,16 +121,16 @@ function HealthIcon:changeIcon(icon)
 end
 
 function HealthIcon:fallbackPlay(anim, fallback)
-	self.animation:play(self.animation:has(anim) and anim or fallback)
-	end
+	self:play(self.__animations[anim] and anim or fallback)
+end
 
 function HealthIcon:setScale(scale)
 	if self.isLegacyStyle then
-		self.scale:set(scale, scale)
+		self.scale.x, self.scale.y = scale, scale
 	else
-		self.scale:set(1, 1)
+		self.scale.x, self.scale.y = 1, 1
 	end
-	-- self:updateHitbox()
+	self:updateHitbox()
 end
 
 function HealthIcon:fixOffsets(width, height)

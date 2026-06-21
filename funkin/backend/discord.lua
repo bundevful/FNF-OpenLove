@@ -1,4 +1,4 @@
-local success, DiscordActivity = pcall(require, "lib.discord")
+local discordRPC = require "lib.discordRPC"
 
 ---@class Discord
 local Discord = {}
@@ -6,49 +6,48 @@ local Discord = {}
 Discord.isInitialized = false
 Discord.clientID = "1098761843956273304"
 
-local _options = {
+local __options = {
 	details = "Starting",
 	state = nil,
-
-	assets = {
-		large_image = "icon",
-		large_text = "FNF LÖVE"
-	}
+	largeImageKey = "icon",
+	largeImageText = "FNF LÖVE",
+	smallImageKey = nil,
+	startTimestamp = nil,
+	endTimestamp = nil
 }
 
+function discordRPC.ready(userId, username, discriminator, avatar)
+	print(string.format("Discord: ready (%s, %s, %s, %s)", userId, username,
+		discriminator, avatar))
+
+	discordRPC.updatePresence(__options)
+end
+
+function discordRPC.disconnected(errorCode, message)
+	print(string.format("Discord: disconnected (%d: %s)", errorCode, message))
+end
+
+function discordRPC.errored(errorCode, message)
+	print(string.format("Discord: error (%d: %s)", errorCode, message))
+end
+
 function Discord.init()
-	if success then
-		DiscordActivity.start(Discord.clientID, true, function()
-			DiscordActivity.setActivity(_options)
-		end)
+	discordRPC.initialize(Discord.clientID, true)
 
-		Logger.log("debug", "Discord Activity started")
-		Discord.isInitialized = true
-	end
+	print("Discord Client initialized")
+	Discord.isInitialized = true
 end
 
-function Discord.shutdown()
-	if success then
-		DiscordActivity.shutdown()
-	end
-end
+function Discord.shutdown() discordRPC.shutdown() end
 
 function Discord.changePresence(options)
-	if success then
-		if not Discord.isInitialized then return end
-		_options = options or {}
-		_options.assets = options.assets or {}
-		_options.assets.large_image = options.assets.large_image or "icon"
-		_options.assets.large_text = options.assets.large_text or "FNF LÖVE"
+	__options = options
+	__options.largeImageKey = options.largeImageKey or "icon"
+	__options.largeImageText = options.largeImageText or "FNF LÖVE"
 
-		DiscordActivity.setActivity(_options)
-	end
+	discordRPC.updatePresence(__options)
 end
 
-function Discord.update()
-	if success then
-		DiscordActivity.update()
-	end
-end
+function Discord.update() discordRPC.runCallbacks() end
 
 return Discord
